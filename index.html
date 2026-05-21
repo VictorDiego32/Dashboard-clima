@@ -8,24 +8,21 @@
 </head>
 <body>
 
-    <!-- Apenas UM bloco main para o propósito central do site -->
+    <!-- Bloco principal que engloba os títulos e a tabela de dados climáticos -->
     <main class="conteudo-principal">
         <h1>AirVision</h1>
         <h2>Visualização climática global alimentada por OpenWeather.</h2>
         
-        <!-- O mapa da API do OpenWeather entrará futuramente aqui neste bloco principal -->
-    </main>
-
-    <!-- Mudamos para <section> pois é uma seção sobre os autores -->
-    <section class="quem-somos">
-        <!-- O texto agora está protegido e estruturado dentro de uma tag <p> -->
-        <p>Desenvolvido por estudantes de ADS e Ciências da Computação para simplificar a visualização meteorológica.</p>
-    </section>
-
-    <section class="container-tabela">
+        <!-- A tabela com os dados do Pandas fica aqui dentro, pois é o conteúdo principal -->
+        <section class="container-tabela">
             <object type="text/html" data="tabela_clima.html" class="janela-dados"></object>
         </section>
     </main>
+
+    <!-- Seção sobre os autores (fora do main, pois é conteúdo secundário) -->
+    <section class="quem-somos">
+        <p>Desenvolvido por estudantes de ADS e Ciências da Computação para simplificar a visualização meteorológica.</p>
+    </section>
 
     <!-- Menu de navegação ou rodapé final -->
     <nav class="navegacao-apoio">
@@ -34,4 +31,3 @@
 
 </body>
 </html>
-
