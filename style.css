@@ -1,0 +1,44 @@
+
+
+/* Ajusta o tamanho da janela que exibe os dados do Pandas */
+.janela-dados {
+    width: 100%;
+    height: 400px; /* Altere a altura se a lista de capitais for muito grande */
+    border: none;  /* Remove bordas feias da janela */
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+/* Centraliza o bloco da tabela */
+.container-tabela {
+    margin-top: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilização aplicada ao bloco principal através da classe */
+.bloco-principal {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f4f4f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+/* Estilização interna dos elementos do bloco principal */
+.bloco-principal h1 {
+    color: #333333;
+    margin-bottom: 15px;
+}
+
+.bloco-principal p {
+    color: #666663;
+    line-height: 1.6;
+}
