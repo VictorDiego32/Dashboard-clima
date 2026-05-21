@@ -78,4 +78,4 @@ print("\n🌍 *** PANORAMA DO CLIMA GLOBAL *** 🌍\n")
 pd.set_option('display.max_rows', None) # Garante que todas as cidades apareçam
 pd.set_option('display.width', 1000)
 print(df_final)
-df_final.to_html('index.html', index=False, classes='tabela-dados')
+df_final.to_html('tabela-clima.html', index=False, classes='tabela-dados')
