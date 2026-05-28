@@ -1,17 +1,11 @@
-import sqlite3
-import pandas as pd
 import requests
-import flask   
-import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go
-pd.api.extensions.register_dataframe_accessor("banco_de_dados")
 import pandas as pd
+import sqlite3
 import time
 from datetime import datetime, timezone, timedelta
 
-# NOVA CHAVE DE API ATUALIZADA
 API_KEY = "767fbbd6abf1f7c9cc0779f9013f96ae"
+DB_NAME = "clima_global.db"
 
 cidades_globais = [
     "Nova York", "Los Angeles", "Toronto", "Cidade do México", 
@@ -22,58 +16,74 @@ cidades_globais = [
     "Sydney", "Auckland", "Melbourne"
 ]
 
-dados_brutos = []
+def inicializar_banco():
+    """Cria a tabela no banco de dados se ela não existir"""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS clima (
+            cidade TEXT PRIMARY KEY,
+            pais TEXT,
+            hora_local TEXT,
+            condicao TEXT,
+            temperatura REAL,
+            sensacao REAL,
+            umidade INTEGER,
+            vento REAL
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-print(f"Iniciando varredura global em {len(cidades_globais)} cidades...")
-print("Isso pode levar cerca de 30 segundos para respeitar os limites da API.\n")
+def atualizar_dados_no_banco():
+    inicializar_banco()
+    print("Iniciando motor de atualização climática contínua...")
 
-for cidade in cidades_globais:
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={API_KEY}&units=metric&lang=pt_br"
-    
-    try:
-        resposta = requests.get(url)
-        if resposta.status_code == 200:
-            dados = resposta.json()
+    while True:
+        dados_brutos = []
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Coletando dados novos da API OpenWeather...")
+
+        for cidade in cidades_globais:
+            url = f"http://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={API_KEY}&units=metric&lang=pt_br"
+            try:
+                resposta = requests.get(url, timeout=10)
+                if resposta.status_code == 200:
+                    dados = resposta.json()
+                    
+                    # Tratamento com fuso horário
+                    timestamp_utc = dados['dt']
+                    fuso_segundos = dados['timezone']
+                    hora_local = datetime.fromtimestamp(timestamp_utc, tz=timezone.utc) + timedelta(seconds=fuso_segundos)
+                    
+                    registro = {
+                        "cidade": dados["name"],
+                        "pais": dados["sys"]["country"],
+                        "hora_local": hora_local.strftime('%H:%M'),
+                        "condicao": dados["weather"][0]["description"].capitalize(),
+                        "temperatura": dados["main"]["temp"],
+                        "sensacao": dados["main"]["feels_like"],
+                        "umidade": dados["main"]["humidity"],
+                        "vento": dados["wind"]["speed"]
+                    }
+                    dados_brutos.append(registro)
+            except Exception as e:
+                print(f"Erro ao coletar {cidade}: {e}")
             
-            # Ajuste da descrição do clima
-            dados['weather_desc'] = dados['weather'][0]['description'].capitalize()
-            del dados['weather']
+            time.sleep(1) # Evita bloqueio da API
+
+        # Grava os dados tratados usando o Pandas e SQL
+        if dados_brutos:
+            df = pd.DataFrame(dados_brutos)
             
-            # Cálculo da hora local
-            timestamp_utc = dados['dt']
-            fuso_segundos = dados['timezone']
-            hora_local = datetime.fromtimestamp(timestamp_utc, tz=timezone.utc) + timedelta(seconds=fuso_segundos)
-            dados['hora_formatada'] = hora_local.strftime('%H:%M')
-            
-            dados_brutos.append(dados)
-            print(f"✅ Dados coletados: {cidade}")
-        else:
-            print(f"❌ Erro ao buscar {cidade}. Código: {resposta.status_code}")
-            
-    except Exception as e:
-        print(f"⚠️ Ocorreu um erro de conexão em {cidade}: {e}")
+            conn = sqlite3.connect(DB_NAME)
+            # O 'REPLACE' garante que se a cidade já existir, ela apenas atualiza os dados antigos
+            df.to_sql('clima', conn, if_exists='replace', index=False)
+            conn.close()
+            print("💾 Banco de dados atualizado com sucesso!")
         
-    time.sleep(1)
+        # Faz a varredura na API a cada 10 minutos
+        print("Aguardando 10 minutos para a próxima coleta de dados...")
+        time.sleep(600)
 
-# Transforma tudo em um DataFrame
-df_clima_global = pd.json_normalize(dados_brutos)
-
-# Adicionamos a 'hora_formatada' na nossa lista de colunas que vão para a tela
-colunas_importantes = [
-    'name', 'sys.country', 'hora_formatada', 'weather_desc', 'main.temp', 
-    'main.feels_like', 'main.humidity', 'wind.speed'
-]
-
-df_final = df_clima_global[colunas_importantes].copy()
-
-# Renomeia para ficar profissional
-df_final.columns = [
-    'Cidade', 'País', 'Hora Local', 'Condição', 'Temp Atual (°C)', 
-    'Sensação (°C)', 'Umidade (%)', 'Vento (m/s)'
-]
-
-print("\n🌍 *** PANORAMA DO CLIMA GLOBAL *** 🌍\n")
-pd.set_option('display.max_rows', None)
-pd.set_option('display.width', 1000)
-print(df_final)
-df_final.to_html('tabela_clima.html', index=False, classes='tabela-dados')
+if __name__ == "__main__":
+    atualizar_dados_no_banco()
