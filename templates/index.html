@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirVision</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Bloco principal que engloba os títulos e a tabela de dados climáticos -->
+    <main class="conteudo-principal">
+        <h1>AirVision</h1>
+        <h2>Visualização climática de principais capitais globais alimentada por OpenWeather.</h2>
+        
+        <!-- A tabela com os dados do Pandas fica aqui dentro, pois é o conteúdo principal -->
+        <section class="container-tabela">
+            <object type="text/html" data="tabela_clima.html" class="janela-dados"></object>
+        </section>
+    </main>
+
+    <!-- Seção sobre os autores (fora do main, pois é conteúdo secundário) -->
+    <section class="quem-somos">
+        <p>Desenvolvido por estudantes de ADS e Ciências da Computação para simplificar a visualização meteorológica.</p>
+    </section>
+
+    <!-- Menu de navegação ou rodapé final -->
+    <nav class="navegacao-apoio">
+        <a href="nosapoie.html">Contribua com nosso Projeto</a>
+    </nav>
+
+</body>
+</html>
