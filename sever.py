@@ -1,17 +1,26 @@
 from flask import Flask, render_template, jsonify
 import sqlite3
+import os
 
 app = Flask(__name__)
 
+# Força o Flask a olhar na mesma pasta do script
+DIRETORIO_ATUAL = os.path.dirname(os.path.abspath(__file__))
+CAMINHO_BANCO = os.path.join(DIRETORIO_ATUAL, 'clima_global.db')
+
 def buscar_do_banco():
-    conn = sqlite3.connect('clima_global.db')
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM clima")
-    linhas = cursor.fetchall()
-    conn.close()
-    # Transforma os dados do banco em uma lista que o JavaScript entende
-    return [dict(l) for l in linhas]
+    try:
+        # Usa o caminho absoluto
+        conn = sqlite3.connect(CAMINHO_BANCO)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM clima")
+        linhas = cursor.fetchall()
+        conn.close()
+        return [dict(l) for l in linhas]
+    except Exception as e:
+        print(f"Erro ao acessar o banco: {e}")
+        return [] # Retorna vazio se der erro, mas não quebra o site
 
 @app.route('/')
 def home():
